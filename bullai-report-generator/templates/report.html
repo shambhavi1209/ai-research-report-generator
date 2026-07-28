@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><style>{{ css }}</style></head>
+<body>
+
+<!-- ============ PAGE 1 HEADER ============ -->
+<table class="hdr"><tr>
+  <td class="hdr-left">
+    <div class="research-title">Retail Equity Research</div>
+    <div class="company-name">{{ report.company_name }}</div>
+    <div class="sector-line">Sector: {{ report.sector | na }}</div>
+  </td>
+  <td class="hdr-right">
+    <div class="brand">GEOJIT</div>
+    <div class="brand-tag">PEOPLE YOU PROSPER WITH</div>
+    <div class="report-chip">{{ report.report_type or "Company Report" }}</div>
+  </td>
+</tr></table>
+
+<table class="strip"><tr>
+  <td class="strip-meta">
+    <table class="meta-grid">
+      <tr class="meta-head">
+        <td>Stock Type</td><td>Bloomberg Code</td><td>NSE Code</td><td>BSE Code</td><td>Time Frame</td>
+      </tr>
+      <tr>
+        <td>{{ report.company_data.stock_type | na }}</td>
+        <td>{{ report.company_data.bloomberg_code | na }}</td>
+        <td>{{ report.company_data.nse_code | na }}</td>
+        <td>{{ report.company_data.bse_code | na }}</td>
+        <td>12 Months</td>
+      </tr>
+    </table>
+    <div class="dataasof">Data as of: {{ report.report_date }}</div>
+  </td>
+  <td class="strip-rating">
+    <div class="rating-box{% if not report.rating %} nr{% endif %}">{{ report.rating or "NOT RATED" }}</div>
+  </td>
+  <td class="strip-prices">
+    <table class="price-tbl">
+      <tr><td>Target</td><td>{{ report.company_data.target_price | rs }}</td></tr>
+      <tr><td>CMP</td><td>{{ report.company_data.cmp | rs }}</td></tr>
+      <tr><td>Return</td><td>{% if upside is not none %}{{ "%+.0f%%" | format(upside) }}{% else %}&mdash;{% endif %}</td></tr>
+    </table>
+  </td>
+</tr></table>
+
+<!-- ============ TWO-COLUMN BODY ============ -->
+<table class="body-grid"><tr>
+
+  <!-- ---- SIDEBAR ---- -->
+  <td class="sidebar">
+    <div class="side-box">
+      <div class="side-head">Company Data</div>
+      <table class="side-table">
+        <tr><td>Market Cap (Rs.cr)</td><td>{{ report.company_data.market_cap_cr | fmt(0) }}</td></tr>
+        <tr><td>52 Week High &mdash; Low (Rs.)</td><td>{{ report.company_data.week52_high | fmt(0) }} - {{ report.company_data.week52_low | fmt(0) }}</td></tr>
+        <tr><td>Enterprise Value (Rs. cr)</td><td>{{ report.company_data.enterprise_value_cr | fmt(0) }}</td></tr>
+        <tr><td>Outstanding Shares (cr)</td><td>{{ report.company_data.outstanding_shares_cr | fmt(1) }}</td></tr>
+        <tr><td>Free Float (%)</td><td>{{ report.company_data.free_float_pct | fmt(1) }}</td></tr>
+        <tr><td>Dividend Yield (%)</td><td>{{ report.company_data.dividend_yield_pct | fmt(1) }}</td></tr>
+        <tr><td>Beta</td><td>{{ report.company_data.beta | fmt(1) }}</td></tr>
+        <tr><td>Face value (Rs.)</td><td>{{ report.company_data.face_value | fmt(1) }}</td></tr>
+      </table>
+    </div>
+
+    <div class="side-box">
+      <div class="side-head">Shareholding (%){% if report.shareholding and report.shareholding.period %} &mdash; {{ report.shareholding.period }}{% endif %}</div>
+      <table class="side-table">
+        {% set sh = report.shareholding %}
+        <tr><td>Promoters</td><td>{{ (sh.promoters_pct if sh else none) | fmt(1) }}</td></tr>
+        <tr><td>FII's</td><td>{{ (sh.fii_pct if sh else none) | fmt(1) }}</td></tr>
+        <tr><td>MFs/Institutions</td><td>{{ (sh.mf_institutions_pct if sh else none) | fmt(1) }}</td></tr>
+        <tr><td>Public</td><td>{{ (sh.public_pct if sh else none) | fmt(1) }}</td></tr>
+        <tr><td>Others</td><td>{{ (sh.others_pct if sh else none) | fmt(1) }}</td></tr>
+      </table>
+    </div>
+
+    <div class="side-box">
+      <div class="side-head">Price Performance</div>
+      <table class="side-table three-col">
+        <tr class="side-sub"><td></td><td>3 Month</td><td>6 Month</td><td>1 Year</td></tr>
+        {% set pp = report.price_performance %}
+        <tr>
+          <td class="lbl">Absolute Return</td>
+          <td>{{ (pp.m3_pct if pp else none) | signed }}</td>
+          <td>{{ (pp.m6_pct if pp else none) | signed }}</td>
+          <td>{{ (pp.y1_pct if pp else none) | signed }}</td>
+        </tr>
+      </table>
+    </div>
+
+    {% if report.financials %}
+    <div class="side-box">
+      <div class="side-head">Y.E March (Rs. cr)</div>
+      <table class="side-table est-tbl">
+        <tr class="side-sub"><td></td>{% for f in report.financials[-3:] %}<td>{{ f.period }}</td>{% endfor %}</tr>
+        {% for label, attr, dec in [
+          ("Sales", "sales_cr", 0), ("Growth (%)", "growth_pct", 1),
+          ("EBITDA", "ebitda_cr", 0), ("EBITDA Margin (%)", "ebitda_margin_pct", 1),
+          ("PAT Adjusted", "adj_pat_cr", 0), ("Growth (%)", "pat_growth_pct", 1),
+          ("Adjusted EPS", "eps", 1), ("P/E", "pe", 1), ("P/B", "pb", 1),
+          ("EV/EBITDA", "ev_ebitda", 1), ("ROE (%)", "roe_pct", 1), ("D/E", "de", 1),
+        ] %}
+        <tr><td class="lbl">{{ label }}</td>{% for f in report.financials[-3:] %}<td>{{ f[attr] | fmt(dec) }}</td>{% endfor %}</tr>
+        {% endfor %}
+      </table>
+    </div>
+    {% endif %}
+  </td>
+
+  <!-- ---- MAIN COLUMN ---- -->
+  <td class="main">
+    {% if report.headline %}<div class="headline">{{ report.headline }}</div>{% endif %}
+
+    {% if report.company_description %}
+    <p class="description">{{ report.company_description }}</p>
+    {% endif %}
+
+    {% if report.result_highlights %}
+    <ul class="highlights">
+      {% for h in report.result_highlights %}<li>{{ h }}</li>{% endfor %}
+    </ul>
+    {% else %}
+    <p class="missing-note">No result highlights could be extracted from the source document.</p>
+    {% endif %}
+
+    <div class="sec-title">Outlook &amp; Valuation</div>
+    {% if report.outlook_valuation %}
+      <p class="narrative">{{ report.outlook_valuation }}</p>
+    {% else %}
+      <p class="missing-note">An outlook &amp; valuation summary could not be derived from the source document.</p>
+    {% endif %}
+
+    {% if qtable %}
+    <div class="sec-title">Quarterly Financials Consolidated</div>
+    <table class="fin-table">
+      <tr class="fin-head">
+        <td class="rowlabel">Rs.cr</td>
+        {% for c in qtable.columns %}<td>{{ c }}</td>{% endfor %}
+      </tr>
+      {% for row in qtable.rows %}
+      <tr>
+        <td class="rowlabel">{{ row.label }}</td>
+        {% for v in row.cells %}<td>{{ v }}</td>{% endfor %}
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+  </td>
+</tr></table>
+
+<!-- ============ PAGE 2 ============ -->
+<div class="page-break"></div>
+<table class="hdr cont"><tr>
+  <td class="hdr-left"><div class="research-title small">{{ report.company_name }}</div></td>
+  <td class="hdr-right"><div class="brand small">GEOJIT</div></td>
+</tr></table>
+
+{% if report.analysis_points %}
+<div class="sec-title">Key highlights</div>
+<ul class="highlights loose">
+  {% for h in report.analysis_points %}<li>{{ h }}</li>{% endfor %}
+</ul>
+{% endif %}
+
+{% if charts.grid %}
+<table class="chart-grid">
+  {% for row in charts.grid %}
+  <tr>
+    {% for c in row %}
+    <td>{% if c %}<div class="chart-title">{{ c.title }}</div><img class="chart-img" src="{{ c.uri }}">{% endif %}</td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+{% if report.financials %}
+<div class="sec-title">Consolidated Financials</div>
+<table class="fin-table wide">
+  <tr class="fin-head">
+    <td class="rowlabel">Y.E March (Rs. Cr)</td>
+    {% for f in report.financials %}<td>{{ f.period }}</td>{% endfor %}
+  </tr>
+  {% for label, attr, dec in [
+    ("Sales", "sales_cr", 0), ("% change", "growth_pct", 1),
+    ("EBITDA", "ebitda_cr", 0), ("EBITDA Margin (%)", "ebitda_margin_pct", 1),
+    ("Adj. PAT", "adj_pat_cr", 0), ("% change", "pat_growth_pct", 1),
+    ("Adj EPS (Rs.)", "eps", 1), ("P/E (x)", "pe", 1), ("P/B (x)", "pb", 1),
+    ("EV/EBITDA (x)", "ev_ebitda", 1), ("ROE (%)", "roe_pct", 1), ("D/E (x)", "de", 1),
+  ] %}
+  <tr><td class="rowlabel">{{ label }}</td>{% for f in report.financials %}<td>{{ f[attr] | fmt(dec) }}</td>{% endfor %}</tr>
+  {% endfor %}
+</table>
+{% else %}
+<div class="sec-title">Consolidated Financials</div>
+<p class="missing-note">Annual financials were not found in the source document.</p>
+{% endif %}
+
+<div class="disclaimer">
+  <div class="disc-head">Disclaimer</div>
+  <p>This document was generated automatically from a user-supplied source document as a
+  layout recreation for a technical assessment. All figures and statements are extracted from
+  that document; fields that could not be found are shown as "&mdash;". No values have been
+  estimated or invented. This is not investment advice and is not published by or affiliated
+  with Geojit Financial Services Ltd. or Geojit Investments Ltd.</p>
+</div>
+
+</body>
+</html>

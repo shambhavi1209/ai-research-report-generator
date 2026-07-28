@@ -1,0 +1,13 @@
+period,revenue_cr,revenue_growth_pct,ebitda_cr,ebitda_margin_pct,adj_pat_cr,pat_growth_pct,eps,pe,roe_pct
+FY23A,1705,10.4,262,15.4,158,11.0,10.9,44.6,21.5
+FY24A,1905,11.7,301,15.8,182,15.2,12.6,38.6,22.1
+FY25A,2140,12.3,345,16.1,210,15.4,14.5,33.5,22.8
+
+# Notes (free text rows below the table):
+# Kaveri Foods Ltd (NSE: KAVERIFOOD, BSE: 544120) is a South-India-focused packaged
+# foods company in ready-to-cook mixes and snacks, distributed via 210000 outlets.
+# FY25: quick-commerce is 11% of sales (6% two years ago). Debt-free, net cash Rs 410 cr,
+# FY25 free cash flow Rs 238 cr. New Hosur plant targeted for Q2FY27.
+# Market data: CMP Rs 486, 52w high 545, 52w low 352, market cap Rs 7020 cr, FV Re 1,
+# book value Rs 88, dividend yield 1.2%. Promoters 61.5%, FII 8.4%, DII 12.2%, public 17.9%.
+# Price performance: 3M -3.1%, 6M +6.8%, 1Y +18.9%. No rating or target price stated.
